@@ -1,10 +1,13 @@
 ﻿using System.Reflection;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using TimeIsMoney.Application;
+using TimeIsMoney.Repository.Infrastructure;
+using TimeIsMoney.Telegram;
 
 namespace TimeIsMoney;
 
@@ -14,11 +17,17 @@ class Program
     {
         var services = new ServiceCollection();
         RegisterServices(services);
+        services.AddDbContext<AppDbContext>(opt =>
+            opt.UseSqlite("Data Source=app.db"));
 
         var provider = services.BuildServiceProvider();
+        using (var scope = provider.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            await db.Database.MigrateAsync();
+        }
         
-        var myService = provider.GetRequiredService<ITimeService>();
-        
+        var myService = provider.GetRequiredService<IMessageHandler>();
         using var cts = new CancellationTokenSource();
         var token = File.ReadAllText("token.txt");
         var bot = new TelegramBotClient(token, cancellationToken: cts.Token);
@@ -34,11 +43,11 @@ class Program
 
         async Task OnMessage(Message msg, UpdateType type)
         {
-            if (msg.Text is null) return;
-            Console.WriteLine($"Received {type} '{msg.Text}' in {msg.Chat}");
-            var result = await myService.GetTimeCost(msg.From!.Id.ToString(), decimal.Parse(msg.Text));
-            Console.WriteLine(result);
-            await bot.SendMessage(msg.Chat, $"{result}");
+            var response = await myService.HandleAsync(msg, type);
+            if (response != null)
+            {
+                await bot.SendMessage(msg.Chat, $"{response.RespondText}");
+            }
         }
 
         Task OnError(Exception e, HandleErrorSource source)

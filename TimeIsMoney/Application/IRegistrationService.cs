@@ -1,6 +1,6 @@
 namespace TimeIsMoney.Application;
 
-public interface IRegistration
+public interface IRegistrationService
 {
     public Task<bool> NeedRegistrationAsync(string userId);
     

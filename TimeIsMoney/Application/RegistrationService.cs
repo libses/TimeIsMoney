@@ -3,7 +3,7 @@ using TimeIsMoney.Repository.Models;
 
 namespace TimeIsMoney.Application;
 
-public class RegistrationService : IRegistration
+public class RegistrationService : IRegistrationService
 {
     private readonly IUserToSalaryRepository userToSalaryRepository;
 

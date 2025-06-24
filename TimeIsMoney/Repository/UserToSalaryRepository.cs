@@ -1,20 +1,27 @@
+using Microsoft.EntityFrameworkCore;
 using TimeIsMoney.Extensions;
+using TimeIsMoney.Repository.Infrastructure;
 using TimeIsMoney.Repository.Models;
 
 namespace TimeIsMoney.Repository;
 
 public class UserToSalaryRepository : IUserToSalaryRepository
 {
-    private Dictionary<string, UserSalaryDbo> userSalaries = new Dictionary<string, UserSalaryDbo>();
-    
-    public Task CreateAsync(UserSalaryDbo salaryDbo)
+    private readonly AppDbContext _context;
+
+    public UserToSalaryRepository(AppDbContext context)
     {
-        userSalaries.Add(salaryDbo.UserId, salaryDbo);
-        return Task.CompletedTask;
+        _context = context;
     }
 
-    public Task<UserSalaryDbo?> FindByUserIdAsync(string userId)
+    public async Task CreateAsync(UserSalaryDbo salaryDbo)
     {
-        return !userSalaries.TryGetValue(userId, out var salary) ? ((UserSalaryDbo?) null).AsTask() : ((UserSalaryDbo?)salary).AsTask();
+        await _context.UserSalaries.AddAsync(salaryDbo);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<UserSalaryDbo?> FindByUserIdAsync(string userId)
+    {
+        return await _context.UserSalaries.Where(x => x.UserId == userId).FirstOrDefaultAsync();
     }
 }

@@ -14,7 +14,7 @@ public class TimeService : ITimeService
         this.userToSalaryRepository = userToSalaryRepository;
     }
 
-    public async Task<TimeSpan> GetTimeCost(string userId, decimal price)
+    public async Task<TimeSpan> GetTimeCostAsync(string userId, decimal price)
     {
         var userSalary = await userToSalaryRepository.FindByUserIdAsync(userId);
         var time = timeCalculator.Calculate(userSalary.MonthSalary, price);
