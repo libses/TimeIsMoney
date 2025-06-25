@@ -46,7 +46,7 @@ class Program
             var response = await myService.HandleAsync(msg, type);
             if (response != null)
             {
-                await bot.SendMessage(msg.Chat, $"{response.RespondText}");
+                await bot.SendMessage(msg.Chat, $"{response.RespondText}", replyMarkup:response.ReplyMarkup);
             }
         }
 
@@ -71,11 +71,7 @@ class Program
 
             foreach (var iface in interfaces)
             {
-                var implementations = types.Where(t => iface.IsAssignableFrom(t)).ToList();
-                if (implementations.Count == 1)
-                {
-                    services.AddTransient(iface, type);
-                }
+                services.AddTransient(iface, type);
             }
         }
     }

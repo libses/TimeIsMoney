@@ -14,10 +14,24 @@ public class UserToSalaryRepository : IUserToSalaryRepository
         _context = context;
     }
 
-    public async Task CreateAsync(UserSalaryDbo salaryDbo)
+    public async Task CreateOrUpdateAsync(UserSalaryDbo salaryDbo)
     {
-        await _context.UserSalaries.AddAsync(salaryDbo);
+        var existing = await _context.UserSalaries.Where(x => x.UserId == salaryDbo.UserId).FirstOrDefaultAsync();
+        if (existing != null)
+        {
+            existing.MonthSalary = salaryDbo.MonthSalary;
+        }
+        else
+        {
+            await _context.UserSalaries.AddAsync(salaryDbo);
+        }
+        
         await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteAsync(string userId)
+    {
+        await _context.UserSalaries.Where(x => x.UserId == userId).ExecuteDeleteAsync();
     }
 
     public async Task<UserSalaryDbo?> FindByUserIdAsync(string userId)

@@ -20,6 +20,11 @@ public class RegistrationService : IRegistrationService
 
     public async Task RegisterAsync(string userId, decimal monthSalary)
     {
-        await userToSalaryRepository.CreateAsync(new UserSalaryDbo { UserId = userId, MonthSalary = monthSalary });
+        await userToSalaryRepository.CreateOrUpdateAsync(new UserSalaryDbo { UserId = userId, MonthSalary = monthSalary });
+    }
+
+    public async Task UnregisterAsync(string userId)
+    {
+        await userToSalaryRepository.DeleteAsync(userId);
     }
 }

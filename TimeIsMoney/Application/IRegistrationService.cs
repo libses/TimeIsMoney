@@ -5,4 +5,6 @@ public interface IRegistrationService
     public Task<bool> NeedRegistrationAsync(string userId);
     
     public Task RegisterAsync(string userId, decimal monthSalary);
+    
+    public Task UnregisterAsync(string userId);
 }
